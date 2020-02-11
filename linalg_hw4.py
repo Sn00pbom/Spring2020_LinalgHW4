@@ -70,7 +70,7 @@ if __name__ == "__main__":
         for ax, zi, j in zip(axes.flat, km.z, range(k)):
             ax.imshow(zi.reshape((nrows, ncols)))
             ax.set_title("z_{}".format(j))
-        plt.savefig(datetime.now().strftime('%M-%S.png'), format='png')
+        plt.savefig(datetime.now().strftime('./img/%M-%S.png'), format='png')
 
     last = -1
     curr = 0
