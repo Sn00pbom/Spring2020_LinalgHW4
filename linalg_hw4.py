@@ -34,7 +34,7 @@ class kMeans(object):
     def _update_reps(self):
         for j in range(self.k):
             Gj = self._G(j)
-            self.z[j] = self.z[j] if len(Gj) == 0 else np.mean(Gj, axis=0)
+            self.z[j] = np.zeros(self.n) if len(Gj) == 0 else np.mean(Gj, axis=0)
 
     def Jclust(self):
         tot = 0.0
