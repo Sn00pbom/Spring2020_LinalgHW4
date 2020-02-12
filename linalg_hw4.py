@@ -22,15 +22,15 @@ class kMeans(object):
     z: group representatives z₁,....,zₖ
     """
 
-    def __init__(self, x, k):
+    def __init__(self, x, z):
         """Initialize k-means on vectors xᵢ with k groups"""
         self.x = x
-        self.k = k
+        self.k = len(z)  # k depends on initial z that is passed
         self.n = len(x[0])  # number of entries in each n-vector
         self.N = len(x)  # number of n-vectors
 
-        self.c = np.random.randint(0,k,self.N)  # init random group assignments
-        self.z = array([np.random.rand(self.n)*255 for _ in range(k)])  # init random noise reps
+        self.c = np.random.randint(0,self.k,self.N)  # init random group assignments
+        self.z = z
 
     def __next__(self):
         """Update step - groups then reps. Returns computed error Jᶜˡᶸˢᵗ"""
@@ -76,7 +76,7 @@ class kMeans(object):
 
 if __name__ == "__main__":
     # Load MNIST into x array of n-vectors
-    with open('/home/zach/DATASET/train-images-idx3-ubyte', 'rb') as f:
+    with open('train-images-idx3-ubyte', 'rb') as f:
         # As per specification on the MNIST source site
         # first four bytes are magic number
         # second four bytes are size of array
@@ -84,22 +84,27 @@ if __name__ == "__main__":
         # third four bytes are nrows
         # fourth four bytes are ncols
         nrows, ncols = struct.unpack(">II", f.read(8))
+        print(nrows*ncols, 'entries')
         # Rest is data, load directly into numpy
         x = np.fromfile(f, dtype=np.dtype(np.uint8).newbyteorder('>'))
         # Reshape into "size" nrows*ncols-vectors
         x = x.reshape((size, nrows*ncols))
 
-    # Arbitrarily define k groups
-    k = 20
+    # Load z initial state from csv
+    with open('z.csv', 'r') as f:
+        z = f.read()  # read string
+        z = z.split('\n')  # split string into array by newline
+        z = [s.split(',') for s in z]  # split strings in array into arrays by comma
+        z = array(z, dtype='float')  # convert to numpy array
 
     # Init k-means object with vector array x and k groups
-    km = kMeans(x, k)
+    km = kMeans(x, z)
 
     def gen_imgs():
         """Save reps to image"""
         fig, axes = plt.subplots(5, 4, subplot_kw={'xticks': [], 'yticks': []})
         fig.subplots_adjust(hspace=0.5)
-        for ax, zi, j in zip(axes.flat, km.z, range(k)):
+        for ax, zi, j in zip(axes.flat, km.z, range(len(z))):
             ax.imshow(zi.reshape((nrows, ncols)))
             ax.set_title("z_{}".format(j))
         plt.savefig(datetime.now().strftime('./img/%M-%S.png'), format='png')
@@ -110,7 +115,8 @@ if __name__ == "__main__":
     count = 0
     while curr != last:
         gen_imgs()
-        print(km.Jclust())
+        print('Jclust', count, km.Jclust())
         last = curr
         curr = next(km)
+        count += 1
     gen_imgs()
