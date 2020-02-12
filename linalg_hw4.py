@@ -90,7 +90,7 @@ if __name__ == "__main__":
         x = x.reshape((size, nrows*ncols))
 
     # Arbitrarily define k groups
-    k = 10
+    k = 20
 
     # Init k-means object with vector array x and k groups
     km = kMeans(x, k)
